@@ -38,5 +38,6 @@ router_settings:
   routing_strategy: simple-shuffle
   num_retries: 3
   timeout: 600
+  stream_timeout: 120
   allowed_fails: 1
   cooldown_time: 300

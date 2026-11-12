@@ -1,0 +1,43 @@
+model_list:
+  - model_name: deepseek-flash
+    litellm_params:
+      model: openai/deepseek-v4.1-flash:free
+      api_base: https://tokenharbor.ai/v1
+      api_key: os.environ/TOKENHARBOR_API_KEY
+      order: 1
+      use_chat_completions_api: true
+    model_info:
+      id: tokenharbor
+
+  - model_name: deepseek-flash
+    litellm_params:
+      model: openai/free/deepseek-v4.1-flash
+      api_base: https://api.apinex.bond/v1
+      api_key: os.environ/APINEX_API_KEY
+      order: 2
+      use_chat_completions_api: true
+    model_info:
+      id: apinex
+
+  - model_name: deepseek-flash
+    litellm_params:
+      model: openai/Beam-1.0-501B-A23B
+      api_base: https://api.reflection.ai/openai/v1
+      api_key: os.environ/REFLECTION_API_KEY
+      order: 3
+      use_chat_completions_api: true
+    model_info:
+      id: reflection-fallback
+
+litellm_settings:
+  drop_params: true
+  request_timeout: 600
+
+router_settings:
+  enable_pre_call_checks: true
+  routing_strategy: simple-shuffle
+  num_retries: 3
+  timeout: 600
+  stream_timeout: 120
+  allowed_fails: 1
+  cooldown_time: 300

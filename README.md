@@ -37,6 +37,25 @@ cannot fit on (context window, region, unsupported parameters), which is why it 
 down for `cooldown_time` seconds before being tried again.
 See [`litellm_config.yaml`](./litellm_config.yaml).
 
+### Timeouts
+
+Both `router_settings.timeout` and `litellm_settings.request_timeout` bound a *single attempt*,
+not the whole failover walk. A provider that accepts the connection and then stalls therefore
+holds the request for the full `timeout` before the router even considers the next tier — and
+because Codex gives up at `stream_idle_timeout_ms` (default 300000 ms = 5 min), a 600-second
+attempt means the client walks away before failover ever runs.
+
+So the two knobs do different jobs:
+
+- `timeout: 600` — ceiling for a genuinely slow but working response. Kept long on purpose, for
+  long agent turns.
+- `stream_timeout: 120` — how long to wait for the *first chunk*. This is what turns a hung
+  provider into a fast failure, letting the `order` walk escalate. Keep it under the client's
+  own idle timeout (Codex: 300 s).
+
+Only fast failures (429, 5xx, refused connections, and now stalls caught by `stream_timeout`)
+trigger failover; a slow-but-alive provider is deliberately allowed to finish.
+
 Current alias in the shipped config: `deepseek-flash`
 
 | order | provider | upstream model | base URL |
@@ -140,6 +159,9 @@ Rules of thumb:
 
 ## Limitations
 
+- **Failover only covers fast failures.** Stalls are caught by `stream_timeout`, but a
+  provider that streams slowly for the whole `timeout` still occupies one attempt; raise
+  `stream_timeout` above the client's idle timeout and the client, not the gateway, gives up.
 - **Free tiers are unreliable.** Expect rate limits and outages; the order/cooldown machinery
   is what keeps the alias usable.
 - **Not the same model everywhere.** Fallback providers serve different models with different

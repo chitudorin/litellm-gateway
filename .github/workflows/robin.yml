@@ -21,7 +21,7 @@ jobs:
         startsWith(github.event.comment.body, '/robin') &&
         contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
       )
-    uses: antongulin/robin/.github/workflows/review.yml@c96f54a4abd07090f37aefa3f9654b489808389c # v2.13.2
+    uses: antongulin/robin/.github/workflows/review.yml@c307d49e53284c3c0e05c9a764ab9e8cce6f7dff # v2.13.3
     secrets:
       LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
       LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
